@@ -43,7 +43,7 @@ enum {
 };
 
 GLfloat lightpos[] =
-{ 50.f, 50.f, -320.f, 1.f };
+{ -150.f, -150.f, 50.f, 1.f };
 
 void redraw(void)
 {
