@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-GLfloat x0 = 50.0, y0 = 150.0, z0 = 300.0;
-GLfloat xref = 0.0, yref = 150.0, zref = 0.0;
+GLfloat x0 = 50.0, y0 = 450.0, z0 = 300.0;
+GLfloat xref = 0.0, yref = 300.0, zref = 0.0;
 GLfloat Vx = 0.0, Vy = 1.0, Vz = 0.0;
 
 GLfloat xwMin = -30.0, ywMin = -30.0, xwMax = 30.0, ywMax = 30.0;
@@ -114,9 +114,25 @@ void redraw(void)
 	glBegin(GL_QUADS);
 	glNormal3f(0.f, 0.f, 1.f);
 	glVertex3f(-100.f, 0.f, -200.f);
+	glVertex3f(0.f, 0.f, -200.f);
+	glVertex3f(0.f, 300.f, -200.f);
+	glVertex3f(-100.f, 300.f, -200.f);
+	glEnd();
+
+	glBegin(GL_QUADS);
+	glNormal3f(0.f, 0.f, 1.f);
+	glVertex3f(0.f, 130.f, -200.f);
+	glVertex3f(50.f, 130.f, -200.f);
+	glVertex3f(50.f, 300.f, -200.f);
+	glVertex3f(0.f, 300.f, -200.f);
+	glEnd();
+
+	glBegin(GL_QUADS);
+	glNormal3f(0.f, 0.f, 1.f);
+	glVertex3f(50.f, 0.f, -200.f);
 	glVertex3f(200.f, 0.f, -200.f);
 	glVertex3f(200.f, 300.f, -200.f);
-	glVertex3f(-100.f, 300.f, -200.f);
+	glVertex3f(50.f, 300.f, -200.f);
 	glEnd();
 
 /* Map */
