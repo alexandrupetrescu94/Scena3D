@@ -93,22 +93,25 @@ void redraw(void)
 	glVertex3f(200.f, 0.f, -500.f);
 	glVertex3f(200.f, 300.f, -500.f);
 	glVertex3f(200.f, 300.f, -200.f);
-
+	glEnd();
 	/* ceiling */
+	glBegin(GL_QUADS);
 	glNormal3f(0.f, -1.f, 0.f);
 	glVertex3f(-100.f, 300.f, -200.f);
 	glVertex3f(-100.f, 300.f, -500.f);
 	glVertex3f(200.f, 300.f, -500.f);
 	glVertex3f(200.f, 300.f, -200.f);
-
+	glEnd();
 	/* back wall */
+	glBegin(GL_QUADS);
 	glNormal3f(0.f, 0.f, 1.f);
 	glVertex3f(-100.f, 0.f, -500.f);
 	glVertex3f(200.f, 0.f, -500.f);
 	glVertex3f(200.f, 300.f, -500.f);
 	glVertex3f(-100.f, 300.f, -500.f);
-
+	glEnd();
 	/* front wall */
+	glBegin(GL_QUADS);
 	glNormal3f(0.f, 0.f, 1.f);
 	glVertex3f(-100.f, 0.f, -200.f);
 	glVertex3f(200.f, 0.f, -200.f);
@@ -119,13 +122,16 @@ void redraw(void)
 /* Map */
 
 /* Left Block */
+glBegin(GL_QUADS);
 glNormal3f(0.f, -1.f, 0.f);
 glVertex3f(-300.f, 0.f, -800.f);
 glVertex3f(-100.f, 0.f, -800.f);
 glVertex3f(-100.f, 0.f, 100.f);
 glVertex3f(-300.f, 0.f, 100.f);
+glEnd();
 
 /* Right Block */
+glBegin(GL_QUADS);
 glNormal3f(0.f, -1.f, 0.f);
 glVertex3f(200.f, 0.f, -800.f);
 glVertex3f(400.f, 0.f, -800.f);
@@ -134,6 +140,7 @@ glVertex3f(200.f, 0.f, 100.f);
 glEnd();
 
 /* Backward Block */
+glBegin(GL_QUADS);
 glNormal3f(0.f, -1.f, 0.f);
 glVertex3f(-100.f, 0.f, -800.f);
 glVertex3f(200.f, 0.f, -800.f);
@@ -142,6 +149,7 @@ glVertex3f(-100.f, 0.f, -500.f);
 glEnd();
 
 /* Frontward Block */
+glBegin(GL_QUADS);
 glNormal3f(0.f, -1.f, 0.f);
 glVertex3f(-100.f, 0.f, -200.f);
 glVertex3f(200.f, 0.f, -200.f);
