@@ -5,6 +5,7 @@
 
 #include <GL/glut.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 GLfloat x0 = 50.0, y0 = 150.0, z0 = 300.0;
@@ -15,6 +16,10 @@ GLfloat xwMin = -30.0, ywMin = -30.0, xwMax = 30.0, ywMax = 30.0;
 
 GLfloat dnear = 1.0, dfar = 40.0;
 
+// angle of rotation for the camera direction
+GLfloat angle=0.0;
+// actual vector representing the camera's direction
+GLfloat lx=0.0f,lz=-1.0f;
 /* Create a single component texture map */
 GLfloat * make_texture(int maxs, int maxt)
 {
@@ -103,6 +108,13 @@ void redraw(void)
 	glVertex3f(200.f, 0.f, -500.f);
 	glVertex3f(200.f, 300.f, -500.f);
 	glVertex3f(-100.f, 300.f, -500.f);
+
+	/* front wall */
+	glNormal3f(0.f, 0.f, 1.f);
+	glVertex3f(-100.f, 0.f, -200.f);
+	glVertex3f(200.f, 0.f, -200.f);
+	glVertex3f(200.f, 300.f, -200.f);
+	glVertex3f(-100.f, 300.f, -200.f);
 	glEnd();
 
 	glPushMatrix();
@@ -124,6 +136,32 @@ void key(unsigned char key, int x, int y)
 
 const int TEXDIM = 256;
 
+void processSpecialKeys(int key, int xx, int yy) {
+
+	float fraction = 0.1f;
+
+	switch (key) {
+		case GLUT_KEY_LEFT :
+			angle -= 0.01f;
+			lx = sin(angle);
+			lz = -cos(angle);
+			break;
+		case GLUT_KEY_RIGHT :
+			angle += 0.01f;
+			lx = sin(angle);
+			lz = -cos(angle);
+			break;
+		case GLUT_KEY_UP :
+			x += lx * fraction;
+			z += lz * fraction;
+			break;
+		case GLUT_KEY_DOWN :
+			x -= lx * fraction;
+			z -= lz * fraction;
+			break;
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	GLfloat *tex;
@@ -136,13 +174,14 @@ int main(int argc, char *argv[])
 	(void)glutCreateWindow("Scena3D");
 	glutDisplayFunc(redraw);
 	glutKeyboardFunc(key);
+	glutSpecialFunc(processSpecialKeys);
 
 	/* draw a perspective scene */
 	glMatrixMode(GL_PROJECTION);
 	//glFrustum(-300., 400., 0., 300., 100., -800.); left right bottom top near far
 	glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
 	// glMatrixMode(GL_MODELVIEW);
-	gluLookAt (x0, y0, z0, xref, yref, zref, Vx, Vy, Vz);
+	gluLookAt (x0, y0, z0, xref+lx, yref, zref+lz, Vx, Vy, Vz);
 	/* turn on features */
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
