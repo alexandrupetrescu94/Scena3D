@@ -6,6 +6,15 @@
 #include <GL/glut.h>
 #include <stdlib.h>
 
+
+GLfloat x0 = 50.0, y0 = 150.0, z0 = 300.0;
+GLfloat xref = 0.0, yref = 150.0, zref = 0.0;
+GLfloat Vx = 0.0, Vy = 1.0, Vz = 0.0;
+
+GLfloat xwMin = -30.0, ywMin = -30.0, xwMax = 30.0, ywMax = 30.0;
+
+GLfloat dnear = 1.0, dfar = 40.0;
+
 /* Create a single component texture map */
 GLfloat * make_texture(int maxs, int maxt)
 {
@@ -119,7 +128,7 @@ int main(int argc, char *argv[])
 {
 	GLfloat *tex;
 	GLUquadricObj *sphere;
-	
+
 
 	glutInit(&argc, argv);
 	glutInitWindowSize(810,810);
@@ -131,9 +140,9 @@ int main(int argc, char *argv[])
 	/* draw a perspective scene */
 	glMatrixMode(GL_PROJECTION);
 	//glFrustum(-300., 400., 0., 300., 100., -800.); left right bottom top near far
-	glFrustum(-100., 200., 0., 300., -200., -500.); // raportat la observator
-	glMatrixMode(GL_MODELVIEW);
-
+	glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
+	// glMatrixMode(GL_MODELVIEW);
+	gluLookAt (x0, y0, z0, xref, yref, zref, Vx, Vy, Vz);
 	/* turn on features */
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
