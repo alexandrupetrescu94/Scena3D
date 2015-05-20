@@ -117,6 +117,40 @@ void redraw(void)
 	glVertex3f(-100.f, 300.f, -200.f);
 	glEnd();
 
+/* Map */
+
+/* Left Block */
+glNormal3f(0.f, -1.f, 0.f);
+glVertex3f(-300.f, 0.f, -800.f);
+glVertex3f(-100.f, 0.f, -800.f);
+glVertex3f(-100.f, 0.f, 100.f);
+glVertex3f(-300.f, 0.f, 100.f);
+
+/* Right Block */
+glNormal3f(0.f, -1.f, 0.f);
+glVertex3f(200.f, 0.f, -800.f);
+glVertex3f(400.f, 0.f, -800.f);
+glVertex3f(400.f, 0.f, 100.f);
+glVertex3f(200.f, 0.f, 100.f);
+glEnd();
+
+/* Backward Block */
+glNormal3f(0.f, -1.f, 0.f);
+glVertex3f(-100.f, 0.f, -800.f);
+glVertex3f(200.f, 0.f, -800.f);
+glVertex3f(200.f, 0.f, -500.f);
+glVertex3f(-100.f, 0.f, -500.f);
+glEnd();
+
+/* Frontward Block */
+glNormal3f(0.f, -1.f, 0.f);
+glVertex3f(-100.f, 0.f, -200.f);
+glVertex3f(200.f, 0.f, -200.f);
+glVertex3f(200.f, 0.f, 100.f);
+glVertex3f(-100.f, 0.f, 100.f);
+glEnd();
+
+
 	glPushMatrix();
 	glTranslatef(lightpos[X], lightpos[Y], lightpos[Z]);
 	glDisable(GL_LIGHTING);
