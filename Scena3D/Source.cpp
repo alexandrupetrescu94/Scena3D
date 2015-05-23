@@ -2,15 +2,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <math.h>
 using namespace std;
 
 const int TEXDIM = 256;
 
 //Observer Coords
-GLfloat x0 = 50.0, y0 = 450.0, z0 = 300.0;
+GLfloat x0 = 50.0, eye0 = 450.0, z0 = 300.0;
 GLfloat xref = 0.0, yref = 300.0, zref = 0.0;
 GLfloat Vx = 0.0, Vy = 1.0, Vz = 0.0;
 
+// angle of rotation for the camera direction
+float angle=0.0;
 float lx = -1.0f,lz = -1.0f; // actual vector representing the camera's direction
 
 GLfloat *tex;
@@ -28,7 +31,7 @@ GLfloat * make_texture(int maxs, int maxt) {
 }
 
 GLUquadricObj *sphereLight;
-GLfloat lightpos[] = { -150.f, -150.f, 50.f, 1.f };
+GLfloat lightpos[] = { -150.f, 200.f, 50.f, 1.f };
 enum {
 	X, Y, Z, W
 };
@@ -161,7 +164,7 @@ void renderScene(void){
 	
 	// Add the new transformation #1Issue
 	glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
-	gluLookAt(x0, y0, z0, xref, yref, zref, Vx, Vy, Vz); // reset camera
+	gluLookAt(x0, eye0, z0, xref, yref, zref, Vx, Vy, Vz); // reset camera
 
 	/* material properties for objects in scene */
 	static GLfloat wall_mat[] = { 1.f, 1.f, 1.f, 1.f };
@@ -202,13 +205,36 @@ void processSpecialKeys(int key, int xx, int yy) {
 			xref += lx * fraction;
 			break;
 	}
+	/*	
+	float fraction = 2.1f;
+
+	switch (key) {
+		case GLUT_KEY_LEFT :
+			angle -= 0.01f;
+			lx = sin(angle);
+			lz = -cos(angle);
+			break;
+		case GLUT_KEY_RIGHT :
+			angle += 0.01f;
+			lx = sin(angle);
+			lz = -cos(angle);
+			break;
+		case GLUT_KEY_UP :
+			x0 += lx * fraction;
+			z0 += lz * fraction;
+			break;
+		case GLUT_KEY_DOWN :
+			x0 -= lx * fraction;
+			z0 -= lz * fraction;
+			break;
+	}*/
 }
 
 void initialize(){
 	/* draw a perspective scene */
 	glMatrixMode(GL_PROJECTION);
 	glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
-	gluLookAt (x0, y0, z0, xref, yref, zref, Vx, Vy, Vz);
+	gluLookAt (x0, eye0, z0, xref, yref, zref, Vx, Vy, Vz);
 	/* turn on features and place light 0 in the right place */
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
