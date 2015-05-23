@@ -10,10 +10,7 @@ const int TEXDIM = 256;
 GLfloat x0 = 50.0, y0 = 450.0, z0 = 300.0;
 GLfloat xref = 0.0, yref = 300.0, zref = 0.0;
 GLfloat Vx = 0.0, Vy = 1.0, Vz = 0.0;
-//Projection Coords
-GLfloat dnear = 1.0, dfar = 40.0;
 
-float angle = 0.0; 		// angle of rotation for the camera direction
 float lx = -1.0f,lz = -1.0f; // actual vector representing the camera's direction
 
 GLfloat *tex;
@@ -158,15 +155,13 @@ void build_house(){
 }
 
 void renderScene(void){
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);	
 	// Reset transformations
 	glLoadIdentity();
 	
-	// Add the new transformation
+	// Add the new transformation #1Issue
 	glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
 	gluLookAt(x0, y0, z0, xref, yref, zref, Vx, Vy, Vz); // reset camera
-	cout << "zref= " << zref << endl;
 
 	/* material properties for objects in scene */
 	static GLfloat wall_mat[] = { 1.f, 1.f, 1.f, 1.f };
@@ -192,16 +187,19 @@ void key(unsigned char key, int x, int y){
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
-
 	float fraction = 1.0f;
 	switch (key) {
 		case GLUT_KEY_UP :
-			xref += lx * fraction;
 			zref += lz * fraction;
 			break;
 		case GLUT_KEY_DOWN :
-			xref -= lx * fraction;
 			zref -= lz * fraction;
+			break;
+		case GLUT_KEY_LEFT :
+			xref -= lx * fraction;
+			break;
+		case GLUT_KEY_RIGHT :
+			xref += lx * fraction;
 			break;
 	}
 }
@@ -238,25 +236,9 @@ int main(int argc, char *argv[]){
 	glutDisplayFunc(renderScene);
 	glutIdleFunc(renderScene);
 	glutKeyboardFunc(key);
-	glutSpecialFunc(processSpecialKeys);
-	//glutReshapeFunc(reshape); Not Working (Optional)
+	glutSpecialFunc(processSpecialKeys); // ZREF not working as expected - we must move in depth
 	initialize();
 	glEnable(GL_DEPTH_TEST);
 	glutMainLoop();
 	return 0;
 }
-
-
-/*
-Functions TODO:
-
-void reshape(GLsizei w, GLsizei h) {
-  glViewport(0, 0, (GLsizei) w, (GLsizei) h);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
-  glMatrixMode(GL_MODELVIEW);
-
-}
-
-*/
