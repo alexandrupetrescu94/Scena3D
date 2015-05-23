@@ -1,27 +1,24 @@
-// codurile pot fi gasite pe site-ul http://www.opengl.org/resources/code/samples/glut_examples/advanced/advanced.html
-/* projshadow.c - by Tom McReynolds, SGI */
-
-/* Rendering shadows using projective shadows. */
-
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
+using namespace std;
 
+//Observer Coords
 GLfloat x0 = 50.0, y0 = 450.0, z0 = 300.0;
 GLfloat xref = 0.0, yref = 300.0, zref = 0.0;
 GLfloat Vx = 0.0, Vy = 1.0, Vz = 0.0;
-
-GLfloat xwMin = -30.0, ywMin = -30.0, xwMax = 30.0, ywMax = 30.0;
-
+//Projection Coords
 GLfloat dnear = 1.0, dfar = 40.0;
 
-// angle of rotation for the camera direction
-float angle=0.0;
-// actual vector representing the camera's direction
-float lx=0.0f,lz=-1.0f;
-/* Create a single component texture map */
-GLfloat * make_texture(int maxs, int maxt)
-{
+
+GLfloat xwMin = -30.0, ywMin = -30.0, xwMax = 30.0, ywMax = 30.0;
+float angle = 0.0; 		// angle of rotation for the camera direction
+float lx = 0.0f,lz = -1.0f; // actual vector representing the camera's direction
+
+
+GLfloat *tex;
+GLfloat * make_texture(int maxs, int maxt) {
 	int s, t;
 	static GLfloat *texture;
 
@@ -34,30 +31,57 @@ GLfloat * make_texture(int maxs, int maxt)
 	return texture;
 }
 
+
+GLUquadricObj *sphereLight;
+GLfloat lightpos[] = { -150.f, -150.f, 50.f, 1.f };
+enum {
+	X, Y, Z, W
+};
 enum {
 	SPHERE = 1, LIGHT, LEFTWALL, FLOOR
 };
 
-enum {
-	X, Y, Z, W
-};
 
-GLfloat lightpos[] =
-{ -150.f, -150.f, 50.f, 1.f };
 
-void redraw(void)
-{
-	/* material properties for objects in scene */
-	static GLfloat wall_mat[] =
-	{ 1.f, 1.f, 1.f, 1.f };
+void build_map(){
+	/* Left Block */
+    glBegin(GL_QUADS);
+    glNormal3f(0.f, -1.f, 0.f);
+    glVertex3f(-300.f, 0.f, -800.f);
+    glVertex3f(-100.f, 0.f, -800.f);
+    glVertex3f(-100.f, 0.f, 100.f);
+    glVertex3f(-300.f, 0.f, 100.f);
+    glEnd();
 
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    /* Right Block */
+    glBegin(GL_QUADS);
+    glNormal3f(0.f, -1.f, 0.f);
+    glVertex3f(200.f, 0.f, -800.f);
+    glVertex3f(400.f, 0.f, -800.f);
+    glVertex3f(400.f, 0.f, 100.f);
+    glVertex3f(200.f, 0.f, 100.f);
+    glEnd();
 
-	/* Note: wall verticies are ordered so they are all front facing this lets
-	me do back face culling to speed things up.  */
+    /* Backward Block */
+    glBegin(GL_QUADS);
+    glNormal3f(0.f, -1.f, 0.f);
+    glVertex3f(-100.f, 0.f, -800.f);
+    glVertex3f(200.f, 0.f, -800.f);
+    glVertex3f(200.f, 0.f, -500.f);
+    glVertex3f(-100.f, 0.f, -500.f);
+    glEnd();
 
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, wall_mat);
+    /* Frontward Block */
+    glBegin(GL_QUADS);
+    glNormal3f(0.f, -1.f, 0.f);
+    glVertex3f(-100.f, 0.f, -200.f);
+    glVertex3f(200.f, 0.f, -200.f);
+    glVertex3f(200.f, 0.f, 100.f);
+    glVertex3f(-100.f, 0.f, 100.f);
+    glEnd();
+}
 
+void build_house(){
 	/* floor */
 	/* make the floor textured */
 	glEnable(GL_TEXTURE_2D);
@@ -110,7 +134,8 @@ void redraw(void)
 	glVertex3f(200.f, 300.f, -500.f);
 	glVertex3f(-100.f, 300.f, -500.f);
 	glEnd();
-	/* front wall */
+
+	/* front wall 3 parts with door*/
 	glBegin(GL_QUADS);
 	glNormal3f(0.f, 0.f, 1.f);
 	glVertex3f(-100.f, 0.f, -200.f);
@@ -134,45 +159,18 @@ void redraw(void)
 	glVertex3f(200.f, 300.f, -200.f);
 	glVertex3f(50.f, 300.f, -200.f);
 	glEnd();
+}
 
-/* Map */
+void renderScene(void)
+{
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-/* Left Block */
-glBegin(GL_QUADS);
-glNormal3f(0.f, -1.f, 0.f);
-glVertex3f(-300.f, 0.f, -800.f);
-glVertex3f(-100.f, 0.f, -800.f);
-glVertex3f(-100.f, 0.f, 100.f);
-glVertex3f(-300.f, 0.f, 100.f);
-glEnd();
+	/* material properties for objects in scene */
+	static GLfloat wall_mat[] = { 1.f, 1.f, 1.f, 1.f };
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, wall_mat);
 
-/* Right Block */
-glBegin(GL_QUADS);
-glNormal3f(0.f, -1.f, 0.f);
-glVertex3f(200.f, 0.f, -800.f);
-glVertex3f(400.f, 0.f, -800.f);
-glVertex3f(400.f, 0.f, 100.f);
-glVertex3f(200.f, 0.f, 100.f);
-glEnd();
-
-/* Backward Block */
-glBegin(GL_QUADS);
-glNormal3f(0.f, -1.f, 0.f);
-glVertex3f(-100.f, 0.f, -800.f);
-glVertex3f(200.f, 0.f, -800.f);
-glVertex3f(200.f, 0.f, -500.f);
-glVertex3f(-100.f, 0.f, -500.f);
-glEnd();
-
-/* Frontward Block */
-glBegin(GL_QUADS);
-glNormal3f(0.f, -1.f, 0.f);
-glVertex3f(-100.f, 0.f, -200.f);
-glVertex3f(200.f, 0.f, -200.f);
-glVertex3f(200.f, 0.f, 100.f);
-glVertex3f(-100.f, 0.f, 100.f);
-glEnd();
-
+	build_house();
+	build_map();
 
 	glPushMatrix();
 	glTranslatef(lightpos[X], lightpos[Y], lightpos[Z]);
@@ -182,7 +180,7 @@ glEnd();
 	glEnable(GL_LIGHTING);
 	glPopMatrix();
 
-	glutSwapBuffers();    /* high end machines may need this */
+	glutSwapBuffers();
 }
 
 void key(unsigned char key, int x, int y)
@@ -196,7 +194,7 @@ const int TEXDIM = 256;
 void processSpecialKeys(int key, int xx, int yy) {
 
 	float fraction = 0.1f;
-
+	cout << 'a';
 	switch (key) {
 		case GLUT_KEY_UP :
 			xref += lx * fraction;
@@ -211,51 +209,37 @@ void processSpecialKeys(int key, int xx, int yy) {
 
 int main(int argc, char *argv[])
 {
-	GLfloat *tex;
-	GLUquadricObj *sphere;
-
-
 	glutInit(&argc, argv);
-	glutInitWindowSize(810,810);
+	glutInitWindowSize(800,800);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL | GLUT_DOUBLE);
 	(void)glutCreateWindow("Scena3D");
-	glutDisplayFunc(redraw);
+	glutDisplayFunc(renderScene);
 	glutKeyboardFunc(key);
 	glutSpecialFunc(processSpecialKeys);
 
 	/* draw a perspective scene */
 	glMatrixMode(GL_PROJECTION);
-	//glFrustum(-300., 400., 0., 300., 100., -800.); left right bottom top near far
 	glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
-	// glMatrixMode(GL_MODELVIEW);
 	gluLookAt (x0, y0, z0, xref, yref, zref, Vx, Vy, Vz);
-	/* turn on features */
+	/* turn on features and place light 0 in the right place */
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-
-	/* place light 0 in the right place */
 	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
 
-	/* remove back faces to speed things up */
-	//glCullFace(GL_BACK);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
 	/* make display lists for sphere and cone; for efficiency */
-
 	glNewList(LIGHT, GL_COMPILE);
-	sphere = gluNewQuadric();
-	gluSphere(sphere, 5.f, 20, 20);
-	gluDeleteQuadric(sphere);
+	sphereLight = gluNewQuadric();
+	gluSphere(sphereLight, 5.f, 20, 20);
+	gluDeleteQuadric(sphereLight);
 	glEndList();
-
-
 	/* load pattern for current 2d texture */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	tex = make_texture(TEXDIM, TEXDIM);
 	glTexImage2D(GL_TEXTURE_2D, 0, 1, TEXDIM, TEXDIM, 0, GL_RED, GL_FLOAT, tex);
 	free(tex);
 
 	glutMainLoop();
+
 	return 0;
 }
