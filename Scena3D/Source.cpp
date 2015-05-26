@@ -23,7 +23,7 @@ float lx = 1.0f, lz = -1.0f; // actual vector representing the camera's directio
 
 // TODO with shadows and illumination
 GLfloat Afara_xref = 50.0, Afara_yref = 150.0, Afara_zref = 300.0;
-GLfloat Incasa_xref = -150.0 , Incasa_yref = 150.0 , Incasa_zref = -350.0;
+GLfloat Incasa_xref = 116.836 , Incasa_yref = 150.0 , Incasa_zref = -50.5317;
 
 GLfloat *tex;
 GLfloat * make_texture(int maxs, int maxt) {
@@ -39,9 +39,10 @@ GLfloat * make_texture(int maxs, int maxt) {
 	return texture;
 }
 
-GLUquadricObj *sphereLight, *cone, *base;
+GLUquadricObj *sphereLight, *cone, *base, *houseLight;
 
 GLfloat lightpos[] = { -150.f, 350.f, -100.f, 1.f };
+GLfloat houselightpos[] = { 180.f, 200.f, -400.f, 1.f };
 
 GLfloat leftwallshadow[4][4];
 GLfloat floorshadow[4][4];
@@ -128,7 +129,6 @@ void findplane(GLfloat plane[4], GLfloat v0[3], GLfloat v1[3], GLfloat v2[3]) {
 
   plane[D] = -(plane[A] * v0[X] + plane[B] * v0[Y] + plane[C] * v0[Z]);
 }
-
 
 void build_map(){
 	/* Left Block */
@@ -307,7 +307,8 @@ void renderScene(void){
     switch (rendermode) {
 	    case NONE:
 	    	// Add the new transformation
-			glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
+			//glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
+	    	gluPerspective(45.f,1.f,200.f,1000.f);
 			gluLookAt(xref, yref, zref, xref+lx, yref, zref+lz, Vx, Vy, Vz); // reset camera
 		break;
 		case AFARA:
@@ -353,6 +354,14 @@ void renderScene(void){
 	//add sphereLight
 	glPushMatrix();
 	glTranslatef(lightpos[X], lightpos[Y], lightpos[Z]);
+	glDisable(GL_LIGHTING);
+	glColor3f(1.f, 1.f, .7f);
+	glCallList(LIGHT);
+	glEnable(GL_LIGHTING);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(houselightpos[X], houselightpos[Y], houselightpos[Z]);
 	glDisable(GL_LIGHTING);
 	glColor3f(1.f, 1.f, .7f);
 	glCallList(LIGHT);
@@ -408,7 +417,7 @@ void reshape(GLsizei w, GLsizei h){
 	glViewport(0, 0, w, h);
 
 	// Set the correct perspective.
-	gluPerspective(45,ratio,1,100);
+	gluPerspective(45,ratio,200,1000);
 
 	// Get Back to the Modelview
 	glMatrixMode(GL_MODELVIEW);
@@ -441,8 +450,39 @@ void processSpecialKeys(int key, int xx, int yy) {
 void initialize(){
 	/* draw a perspective scene */
 	glMatrixMode(GL_PROJECTION);
-	glFrustum(-100., 100., -100., 100., 200., 1100.); // raportat la observator
-	gluLookAt (xref, yref, zref, xref, yref, zref, Vx, Vy, Vz);
+	gluPerspective(45.f,1.f,200.f,1000.f);
+	gluLookAt (xref, yref, zref, xref+lx, yref, zref+lz, Vx, Vy, Vz);
+
+	/* make shadow matricies */
+	
+	/* 3 points on floor */
+/*	v0[X] = -100.f;
+	v0[Y] = -100.f;
+	v0[Z] = -320.f;
+	v1[X] = 100.f;
+	v1[Y] = -100.f;
+	v1[Z] = -320.f;
+	v2[X] = 100.f;
+	v2[Y] = -100.f;
+	v2[Z] = -520.f;
+
+	findplane(plane, v0, v1, v2);
+	shadowmatrix(floorshadow, plane, lightpos);*/
+
+	/* 3 points on left wall */
+/*	v0[X] = -100.f;
+	v0[Y] = -100.f;
+	v0[Z] = -320.f;
+	v1[X] = -100.f;
+	v1[Y] = -100.f;
+	v1[Z] = -520.f;
+	v2[X] = -100.f;
+	v2[Y] = 100.f;
+	v2[Z] = -520.f;
+
+	findplane(plane, v0, v1, v2);
+	shadowmatrix(leftwallshadow, plane, lightpos);*/
+
 
 	/* turn on features and place light 0 in the right place */
 	glEnable(GL_DEPTH_TEST);
@@ -467,7 +507,6 @@ void initialize(){
 	gluDeleteQuadric(base);
 	glEndList();
 
-
 	/* load pattern for current 2d texture */
 	/*
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -483,7 +522,6 @@ void initialize(){
 	};
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
-
 }
 
 int main(int argc, char *argv[]){
@@ -504,8 +542,8 @@ int main(int argc, char *argv[]){
     glutAddMenuEntry("Afara", AFARA);
     glutAddMenuEntry("In Casa", INCASA);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
-	initialize();
 	glEnable(GL_DEPTH_TEST);
+	initialize();
 	glutMainLoop();
 	return 0;
 }
