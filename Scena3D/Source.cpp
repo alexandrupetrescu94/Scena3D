@@ -6,6 +6,12 @@
 using namespace std;
 
 const int TEXDIM = 256;
+/* material properties for objects in scene */
+static GLfloat wall_mat[] = { 0.87f, 0.63f, 0.07f, 1.f };
+static GLfloat roof_mat[] = { 0.74f, 0.16f, 0.f, 1.f };
+static GLfloat map_mat[] = { 0.f, 1.f, 0.3f, 1.f };
+static GLfloat cone_mat[] = { 1.f, 0.4f, 0.f, 1.f };
+
 
 //Observer Coords
 GLfloat eyex0 = 50.0, eyey0 = 450.0, eyez0 = 300.0; // X Y Z position of the camera
@@ -185,7 +191,7 @@ void build_house(){
 
 	glBegin(GL_QUADS);
 	/* left wall */
-	glNormal3f(1.f, 0.f, 0.f);
+	glNormal3f(0.f, 0.f, 1.f);
 	glVertex3f(-100.f, 0.f, -200.f);
 	glVertex3f(-100.f, 0.f, -500.f);
 	glVertex3f(-100.f, 300.f, -500.f);
@@ -259,6 +265,40 @@ void build_house(){
 	glDisable (GL_BLEND);
 }
 
+void build_roof(){
+	/* Roof */
+	//Left
+	glBegin(GL_QUADS);
+	glNormal3f(1.f, 0.f, 0.f);
+	glVertex3f(-100.f, 300.f, -200.f);
+	glVertex3f(-100.f, 300.f, -500.f);
+	glVertex3f(50.f, 500.f, -500.f);
+	glVertex3f(50.f, 500.f, -200.f);
+	glEnd();
+	//Right
+	glBegin(GL_QUADS);
+	glNormal3f(-1.f, 0.f, 0.f);
+	glVertex3f(200.f, 300.f, -200.f);
+	glVertex3f(200.f, 300.f, -500.f);
+	glVertex3f(50.f, 500.f, -500.f);
+	glVertex3f(50.f, 500.f, -200.f);
+	glEnd();
+	//Front
+	glBegin(GL_TRIANGLES);
+	glNormal3f(0.f, 0.f, 1.f);
+	glVertex3f(-100.f, 300.f, -200.f);
+	glVertex3f(50.f, 500.f, -200.f);
+	glVertex3f(200.f, 300.f, -200.f);
+	glEnd();
+	//Back
+	glBegin(GL_TRIANGLES);
+	glNormal3f(0.f, 0.f, 1.f);
+	glVertex3f(-100.f, 300.f, -500.f);
+	glVertex3f(50.f, 500.f, -500.f);
+	glVertex3f(200.f, 300.f, -500.f);
+	glEnd();
+}
+
 void renderScene(void){
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	// Reset transformations
@@ -292,16 +332,14 @@ void renderScene(void){
 		break;
     };
 
-	/* material properties for objects in scene */
-	static GLfloat wall_mat[] = { 1.f, 1.f, 1.f, 1.f };
-	static GLfloat map_mat[] = { 0.f, 1.f, 0.3f, 1.f };
-    static GLfloat cone_mat[] = { 1.f, 0.4f, 0.f, 1.f };
-
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, wall_mat);
 	build_house();
 
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, map_mat);
 	build_map();
+
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, roof_mat);
+	build_roof();
 
 	//glDisable(GL_DEPTH_TEST);
     //glDisable(GL_LIGHTING);
@@ -327,7 +365,7 @@ void renderScene(void){
 void key(unsigned char key, int x, int y){
 	if (key == '\033')
 		exit(0);
-    
+
     if (key == 'f')
     {
         glEnable(GL_FOG);
@@ -431,10 +469,21 @@ void initialize(){
 
 
 	/* load pattern for current 2d texture */
+	/*
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	tex = make_texture(TEXDIM, TEXDIM);
 	glTexImage2D(GL_TEXTURE_2D, 0, 1, TEXDIM, TEXDIM, 0, GL_RED, GL_FLOAT, tex);
 	free(tex);
+	*/
+
+	// Texture type, Level-of-detail, Internal Pixel Format, Width, Height , 0 , RGB, FLOAT, pixels array
+	float pixels[] = {
+	    1.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
+	    0.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f
+	};
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
+
 }
 
 int main(int argc, char *argv[]){
