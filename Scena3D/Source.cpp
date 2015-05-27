@@ -53,6 +53,17 @@ GLfloat leftwallshadow[4][4];
 GLfloat floorshadow[4][4];
 static GLint fogMode;
 
+GLfloat ctrlpoints[4][4][3] = {
+   {{-60, -60, 160}, {-20, -60, 80},
+    {20, -60, -40}, {60, -60, 80}},
+   {{-60, -20, 40}, {-20, -20, 120},
+    {20, -20, 0}, {60, -20, -40}},
+   {{-60, 20, 160}, {-20, 20, 0},
+    {20, 20, 120}, {60, 20, 280}},
+   {{-60, 60, -80}, {-20, 60, -80},
+    {20, 60, 0}, {60, 60, -40}}
+};
+
 enum {
 	A, B, C, D
 };
@@ -353,6 +364,8 @@ void build_roof(){
 }
 
 void renderScene(void){
+    int i, j;
+
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	// Reset transformations
 	glLoadIdentity();
@@ -416,6 +429,39 @@ void renderScene(void){
 	glCallList(LIGHT);
 	glEnable(GL_LIGHTING);
 	glPopMatrix();
+
+
+    glPushMatrix ();
+   glRotatef(90.0, 1.0, 0.0, 0.0);
+   glPointSize (2.0);
+   glLineWidth (2.0);
+   for (j = 0; j <= 8; j++) {
+       glBegin(GL_POINTS);
+    //glBegin(GL_LINE_STRIP);
+      for (i = 0; i <= 30; i++)
+         glEvalCoord2f((GLfloat)i/30.0, (GLfloat)j/8.0);
+      glEnd();
+      glBegin(GL_POINTS);
+    //   glBegin(GL_LINE_STRIP);
+      for (i = 0; i <= 30; i++)
+         glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/30.0);
+      glEnd();
+   };
+   glEnable (GL_MAP2_COLOR_4);
+   for (j = 0; j <= 8; j++) {
+      // glBegin(GL_POINTS);
+    glBegin(GL_LINE_STRIP);
+      for (i = 0; i <= 30; i++)
+         glEvalCoord2f((GLfloat)i/30.0, (GLfloat)j/8.0);
+      glEnd();
+      //glBegin(GL_POINTS);
+    glBegin(GL_LINE_STRIP);
+      for (i = 0; i <= 30; i++)
+         glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/30.0);
+      glEnd();
+   };
+
+   glPopMatrix ();
 
 	glutSwapBuffers();
 }
@@ -587,6 +633,15 @@ void initialize(){
 	};
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
+
+    glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4,
+            0, 1, 12, 4, &ctrlpoints[0][0][0]);
+
+    glEnable(GL_MAP2_VERTEX_3);
+
+    glMapGrid2f(20, 0.0, 1.0, 20, 0.0, 1.0);
+    glEnable(GL_DEPTH_TEST);
+    glShadeModel(GL_FLAT);
 }
 
 int main(int argc, char *argv[]){
