@@ -430,38 +430,13 @@ void renderScene(void){
 	glEnable(GL_LIGHTING);
 	glPopMatrix();
 
-
-    glPushMatrix ();
-   glRotatef(90.0, 1.0, 0.0, 0.0);
-   glPointSize (2.0);
-   glLineWidth (2.0);
-   for (j = 0; j <= 8; j++) {
-       glBegin(GL_POINTS);
-    //glBegin(GL_LINE_STRIP);
-      for (i = 0; i <= 30; i++)
-         glEvalCoord2f((GLfloat)i/30.0, (GLfloat)j/8.0);
-      glEnd();
-      glBegin(GL_POINTS);
-    //   glBegin(GL_LINE_STRIP);
-      for (i = 0; i <= 30; i++)
-         glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/30.0);
-      glEnd();
-   };
-   glEnable (GL_MAP2_COLOR_4);
-   for (j = 0; j <= 8; j++) {
-      // glBegin(GL_POINTS);
-    glBegin(GL_LINE_STRIP);
-      for (i = 0; i <= 30; i++)
-         glEvalCoord2f((GLfloat)i/30.0, (GLfloat)j/8.0);
-      glEnd();
-      //glBegin(GL_POINTS);
-    glBegin(GL_LINE_STRIP);
-      for (i = 0; i <= 30; i++)
-         glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/30.0);
-      glEnd();
-   };
-
-   glPopMatrix ();
+	glPushMatrix();
+	glTranslatef(50,300,-200);
+    glPushMatrix();
+    glRotatef(180.0, 0.0,0.0,1.0);
+    glEvalMesh2(GL_FILL, 0, 20, 0, 20);
+    glPopMatrix();
+    glPopMatrix();
 
 	glutSwapBuffers();
 }
@@ -519,7 +494,7 @@ void reshape(GLsizei w, GLsizei h){
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
-	float fraction = 2.0f;
+	float fraction = 10.0f;
 	switch (key) {
 		case GLUT_KEY_LEFT :
 			angle -= 0.01f;
