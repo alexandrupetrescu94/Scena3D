@@ -12,6 +12,7 @@ static GLfloat roof_mat[] = { 0.74f, 0.16f, 0.f, 1.f };
 static GLfloat map_mat[] = { 0.f, 1.f, 0.3f, 1.f };
 static GLfloat cone_mat[] = { 1.f, 0.4f, 0.f, 1.f };
 
+GLuint qlist;
 
 //Observer Coords
 GLfloat eyex0 = 50.0, eyey0 = 450.0, eyez0 = 300.0; // X Y Z position of the camera
@@ -39,7 +40,11 @@ GLfloat * make_texture(int maxs, int maxt) {
 	return texture;
 }
 
-GLUquadricObj *sphereLight, *cone, *base, *houseLight;
+GLUquadricObj *sphereLight, *cone, *base, *houseLight, *qobj;
+
+GLfloat plane[4];
+GLfloat v0[3], v1[3], v2[3];
+
 
 GLfloat lightpos[] = { -150.f, 350.f, -100.f, 1.f };
 GLfloat houselightpos[] = { 180.f, 200.f, -400.f, 1.f };
@@ -66,6 +71,12 @@ enum {
 
 int rendermode = NONE;
 
+enum {
+	SHADOW, NOSHADOW
+};
+
+int rendershadowmode = SHADOW;
+
 void menu(int selection) {
   rendermode = selection;
   glutPostRedisplay();
@@ -78,6 +89,17 @@ void con(void){
   glPopMatrix();
 }
 
+void cilindru(void){
+    glPushMatrix();
+    glShadeModel (GL_SMOOTH);
+    glTranslatef(-50.0, 0.0, -400.0);
+    glPushMatrix();
+    glRotatef(-90.0, 1.0, 0.0, 0.0);
+    glCallList(qlist);
+    glPopMatrix();
+	glFlush();
+	glPopMatrix();
+}
 /* create a matrix that will project the desired shadow */
 void shadowmatrix(GLfloat shadowMat[4][4],GLfloat groundplane[4],GLfloat lightpos[4]){
   GLfloat dot;
@@ -186,6 +208,22 @@ void build_house(){
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
+	if (rendershadowmode == SHADOW) {
+	    glDisable(GL_DEPTH_TEST);
+	    glDisable(GL_LIGHTING);
+	    glColor3f(0.f, 0.f, 0.f);  /* shadow color */
+	    glPushMatrix();
+	    glMultMatrixf((GLfloat *) floorshadow);
+	    con();
+	    glPopMatrix();
+	    glEnable(GL_DEPTH_TEST);
+	    glEnable(GL_LIGHTING);
+  	}
+  	if (rendershadowmode == SHADOW) {
+	    glEnable(GL_STENCIL_TEST);
+	    glStencilFunc(GL_ALWAYS, 1, 0);
+	    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	}
 
 	/* walls */
 
@@ -197,6 +235,21 @@ void build_house(){
 	glVertex3f(-100.f, 300.f, -500.f);
 	glVertex3f(-100.f, 300.f, -200.f);
 	glEnd();
+	if (rendershadowmode == SHADOW) {
+	    glStencilFunc(GL_EQUAL, 1, 1);
+	    glDisable(GL_DEPTH_TEST);
+	    glDisable(GL_LIGHTING);
+	    glColor3f(0.f, 0.f, 0.f);  /* shadow color */
+	    glDisable(GL_DEPTH_TEST);
+	    glPushMatrix();
+	    glMultMatrixf((GLfloat *) leftwallshadow);
+	    con();
+	    glPopMatrix();
+	    glEnable(GL_DEPTH_TEST);
+	    glDisable(GL_STENCIL_TEST);
+	    glEnable(GL_DEPTH_TEST);
+	    glEnable(GL_LIGHTING);
+    }
 
 	glBegin(GL_QUADS);
 	/* right wall */
@@ -342,14 +395,10 @@ void renderScene(void){
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, roof_mat);
 	build_roof();
 
-	//glDisable(GL_DEPTH_TEST);
-    //glDisable(GL_LIGHTING);
-    //glColor3f(0.f, 0.f, 0.f);  /* shadow color */
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cone_mat);
-    //glMultMatrixf((GLfloat *) floorshadow);
+ 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cone_mat);
     con();
-    //glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_LIGHTING);
+
+    cilindru();
 
 	//add sphereLight
 	glPushMatrix();
@@ -452,43 +501,50 @@ void initialize(){
 	glMatrixMode(GL_PROJECTION);
 	gluPerspective(45.f,1.f,200.f,1000.f);
 	gluLookAt (xref, yref, zref, xref+lx, yref, zref+lz, Vx, Vy, Vz);
-
-	/* make shadow matricies */
-	
-	/* 3 points on floor */
-/*	v0[X] = -100.f;
-	v0[Y] = -100.f;
-	v0[Z] = -320.f;
-	v1[X] = 100.f;
-	v1[Y] = -100.f;
-	v1[Z] = -320.f;
-	v2[X] = 100.f;
-	v2[Y] = -100.f;
-	v2[Z] = -520.f;
-
-	findplane(plane, v0, v1, v2);
-	shadowmatrix(floorshadow, plane, lightpos);*/
-
-	/* 3 points on left wall */
-/*	v0[X] = -100.f;
-	v0[Y] = -100.f;
-	v0[Z] = -320.f;
-	v1[X] = -100.f;
-	v1[Y] = -100.f;
-	v1[Z] = -520.f;
-	v2[X] = -100.f;
-	v2[Y] = 100.f;
-	v2[Z] = -520.f;
-
-	findplane(plane, v0, v1, v2);
-	shadowmatrix(leftwallshadow, plane, lightpos);*/
-
-
-	/* turn on features and place light 0 in the right place */
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	/* make shadow matricies */
+
+	/* 3 points on floor */
+
+    v0[X] = -100.f;
+	v0[Y] = 0.f;
+	v0[Z] = -500.f;
+
+	v1[X] = 200.f;
+	v1[Y] = 0.f;
+	v1[Z] = -500.f;
+
+	v2[X] = 100.f;
+	v2[Y] = 0.f;
+	v2[Z] = -200.f;
+
+	findplane(plane, v0, v1, v2);
+	shadowmatrix(floorshadow, plane, houselightpos);
+
+	/* 3 points on left wall */
+
+    v0[X] = -100.f;
+	v0[Y] = 300.f;
+	v0[Z] = -500.f;
+
+	v1[X] = -100.f;
+	v1[Y] = 300.f;
+	v1[Z] = -200.f;
+
+	v2[X] = -100.f;
+	v2[Y] = 0.f;
+	v2[Z] = -500.f;
+
+	findplane(plane, v0, v1, v2);
+	shadowmatrix(leftwallshadow, plane, houselightpos);
+
+
+	/* turn on features and place light 0 and 1 in the right place */
 	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
+	glLightfv(GL_LIGHT1, GL_POSITION, houselightpos);
 
 	/* make display lists for sphere and cone; for efficiency */
 	glNewList(LIGHT, GL_COMPILE);
@@ -506,6 +562,15 @@ void initialize(){
 	gluDeleteQuadric(cone);
 	gluDeleteQuadric(base);
 	glEndList();
+
+    qlist = glGenLists(1);
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, GLU_FILL); /* smooth shaded */
+    gluQuadricOrientation (qobj, GLU_INSIDE);
+    gluQuadricNormals(qobj, GLU_SMOOTH);
+    glNewList(qlist, GL_COMPILE);
+    gluCylinder(qobj, 20, 20, 100, 15, 5);
+    glEndList();
 
 	/* load pattern for current 2d texture */
 	/*
@@ -525,9 +590,6 @@ void initialize(){
 }
 
 int main(int argc, char *argv[]){
-  	GLfloat plane[4];
-  	GLfloat v0[3], v1[3], v2[3];
-
 	glutInit(&argc, argv);
 	glutInitWindowSize(600,600);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL | GLUT_DOUBLE);
