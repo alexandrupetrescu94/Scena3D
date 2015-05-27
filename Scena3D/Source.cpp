@@ -261,16 +261,40 @@ void build_house(){
 	    glEnable(GL_DEPTH_TEST);
 	    glEnable(GL_LIGHTING);
     }
-
+    /* right wall & window*/
 	glBegin(GL_QUADS);
-	/* right wall */
 	glNormal3f(-1.f, 0.f, 0.f);
 	glVertex3f(200.f, 0.f, -200.f);
-	glVertex3f(200.f, 0.f, -500.f);
-	glVertex3f(200.f, 300.f, -500.f);
+	glVertex3f(200.f, 0.f, -300.f);
+	glVertex3f(200.f, 300.f, -300.f);
 	glVertex3f(200.f, 300.f, -200.f);
-	glEnd();
-	/* ceiling */
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glNormal3f(-1.f, 0.f, 0.f);
+    glVertex3f(200.f, 0.f, -300.f);
+    glVertex3f(200.f, 0.f, -400.f);
+    glVertex3f(200.f, 100.f, -400.f);
+    glVertex3f(200.f, 100.f, -300.f);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glNormal3f(-1.f, 0.f, 0.f);
+    glVertex3f(200.f, 200.f, -300.f);
+    glVertex3f(200.f, 200.f, -400.f);
+    glVertex3f(200.f, 300.f, -400.f);
+    glVertex3f(200.f, 300.f, -300.f);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glNormal3f(-1.f, 0.f, 0.f);
+    glVertex3f(200.f, 0.f, -400.f);
+    glVertex3f(200.f, 0.f, -500.f);
+    glVertex3f(200.f, 300.f, -500.f);
+    glVertex3f(200.f, 300.f, -400.f);
+    glEnd();
+
+    /* ceiling */
 	glBegin(GL_QUADS);
 	glNormal3f(0.f, -1.f, 0.f);
 	glVertex3f(-100.f, 300.f, -200.f);
@@ -327,6 +351,23 @@ void build_house(){
 	glEnd();
 	glDepthMask (GL_TRUE);
 	glDisable (GL_BLEND);
+
+    // amestec albastru cu geam
+    static GLfloat window_mat[] = { 0.0, 0.8, 1.0, 0.7 };
+    glEnable (GL_BLEND);
+    glDepthMask (GL_FALSE);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, window_mat);
+    glBegin(GL_QUADS);
+    glNormal3f(0.f, 0.f, 1.f);
+    glVertex3f(200.f, 100.f, -300.f);
+    glVertex3f(200.f, 100.f, -400.f);
+    glVertex3f(200.f, 200.f, -400.f);
+    glVertex3f(200.f, 200.f, -300.f);
+    glEnd();
+    glDepthMask (GL_TRUE);
+    glDisable (GL_BLEND);
+
 }
 
 void build_roof(){
@@ -431,7 +472,7 @@ void renderScene(void){
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(50,300,-200);
+	glTranslatef(50,300,-150);
     glPushMatrix();
     glRotatef(180.0, 0.0,0.0,1.0);
     glEvalMesh2(GL_FILL, 0, 20, 0, 20);
